@@ -13,6 +13,8 @@ repo linked).
 
 **B+**:  Multiple naive Bayes implementations with either some word modification/removal/n-grams and
 a comparison between the models.
+- [ ] stemming
+- [ ] stopping
 
 **A-**:  Create a scale out of the naive Bayes results, so that articles can be deemed "more right"
 than other right learning articles (similar with left leaning articles). Given that there are levels
