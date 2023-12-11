@@ -8,8 +8,8 @@ repo linked).
 ## Grade Contract / Goals
 **B**:  A Naive Bayes model to predict political sentiment, trained on above annotated data.
 - [x] Document parsing
-- [ ] Training
-- [ ] Query for information
+- [x] Training
+- [x] Test accuracy
 
 **B+**:  Multiple naive Bayes implementations with either some word modification/removal/n-grams and
 a comparison between the models.
