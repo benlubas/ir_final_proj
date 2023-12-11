@@ -14,6 +14,7 @@
           packages = with pkgs; [
             (python.withPackages (ps: with ps; [
               numpy
+              nltk
               pandas
               black
               matplotlib

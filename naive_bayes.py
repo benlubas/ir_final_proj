@@ -1,5 +1,4 @@
 import os
-from types import FunctionType
 from typing import Callable, Dict
 import json
 
@@ -10,7 +9,7 @@ DATA_PATH = "data"
 
 CLASSES = ["left", "center", "right"]
 
-PR_CONST = 6e4
+PR_CONST = 6e5
 
 class NaiveBayes:
     """Add 1 smoothed Naive Bayes classifier"""
@@ -45,14 +44,14 @@ class NaiveBayes:
 
         return data
 
-    def create_sentiment_stats(self, docs: Dict[str, Document]) -> Dict[str, Counter]:
+    def create_sentiment_stats(self, docs: Dict[str, Document], file_name: str) -> Dict[str, Counter]:
         """Create the sentiment stats for the given docs, saves the stats to a file
         args:
             docs: Dictionary of documents to create the stats from
         returns:
             a dict of sentiment to counters for each word
         """
-        stats_path = os.path.join(DATA_PATH, "sentiment_stats.json")
+        stats_path = os.path.join(DATA_PATH, f"{file_name}.json")
         data = self._count_sentiment(docs)
         with open(stats_path, "w") as f:
             json.dump(data, f)
@@ -60,7 +59,7 @@ class NaiveBayes:
         return data
 
     def create_or_load_sentiment_stats(
-        self, docs: Dict[str, Document]
+        self, docs: Dict[str, Document], file_name: str,
     ) -> Dict[str, Counter]:
         """Loads the sentiment stats from a file if it exists, otherwise creates it and saves it
         args:
@@ -68,12 +67,13 @@ class NaiveBayes:
         returns:
             a dict of sentiment to counters for each word
         """
-        stats_path = os.path.join(DATA_PATH, "sentiment_stats.json")
+        stats_path = os.path.join(DATA_PATH, f"{file_name}.json")
         if os.path.exists(stats_path):
+            print(f"loading stats from {stats_path}")
             with open(stats_path, "r") as f:
                 data = json.load(f)
         else:
-            data = self.create_sentiment_stats(docs)
+            data = self.create_sentiment_stats(docs, file_name)
         self.sentiment_stats = data
         return data
 

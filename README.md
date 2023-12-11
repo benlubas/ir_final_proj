@@ -15,6 +15,8 @@ repo linked).
 a comparison between the models.
 - [ ] stemming
 - [ ] stopping
+- [ ] Bigram model
+- [ ] Weighted bigram? like bigram but fallback to unigram model?
 
 **A-**:  Create a scale out of the naive Bayes results, so that articles can be deemed "more right"
 than other right learning articles (similar with left leaning articles). Given that there are levels
