@@ -13,7 +13,7 @@ repo linked).
 
 **B+**:  Multiple naive Bayes implementations with either some word modification/removal/n-grams and
 a comparison between the models.
-- [ ] stemming
+- [x] stemming
 - [ ] stopping
 - [ ] Bigram model
 - [ ] Weighted bigram? like bigram but fallback to unigram model?
