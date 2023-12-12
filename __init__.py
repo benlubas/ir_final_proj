@@ -1,6 +1,7 @@
 from typing import Dict
 from naive_bayes import NaiveBayes
 from document_parser import Document, DocumentParser
+from tantivy_search import TantivySearch
 
 # TODO: arg parser
 # parser = argparse.ArgumentParser(description='Political Sentiment in Conjunction with Search')
@@ -41,3 +42,9 @@ if __name__ == "__main__":
     print(f"Vanila NaiveBayes accuracy: {test_accuracy(bayes, test)}") # ~ 46%
     print(f"Stemmed NaiveBayes accuracy: {test_accuracy(stem_bayes, stem_test)}") # ~ 25% (wow)
     # print(list(docs["left"].items())[:100])
+
+    ts = TantivySearch("vanila")
+    ts.add_documents(vanila_doc_parser)
+    results = ts.query("Obama")
+    print(results)
+    print(len(results))
