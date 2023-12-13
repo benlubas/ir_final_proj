@@ -1,11 +1,10 @@
+import os
 from typing import Dict
 from naive_bayes import NaiveBayes
 from document_parser import Document, DocumentParser
 from tantivy_search import TantivySearch
 
-# TODO: arg parser
-# parser = argparse.ArgumentParser(description='Political Sentiment in Conjunction with Search')
-# parser.add_argument('action', help="action to perform")
+DATA_PATH = "./data"
 
 def test_accuracy(model: NaiveBayes, test_set: Dict[str, Document]) -> float:
     predictions = model.predict(test)
@@ -31,13 +30,13 @@ if __name__ == "__main__":
     stem_train = stem_doc_parser.read_split("train")
     stem_test = stem_doc_parser.read_split("test")
 
-    bayes = NaiveBayes(vanila_doc_parser)
-    bayes.create_or_load_sentiment_stats(train, "vanila_sentiment_stats")
-    bayes.train()
+    bayes = NaiveBayes(os.path.join(DATA_PATH, "vanila_bayes"), vanila_doc_parser)
+    bayes.load_or_create_sentiment_stats(train)
+    bayes.load_params_or_train()
 
-    stem_bayes = NaiveBayes(stem_doc_parser)
-    stem_bayes.create_or_load_sentiment_stats(stem_train, "stem_sentiment_stats")
-    stem_bayes.train()
+    stem_bayes = NaiveBayes(os.path.join(DATA_PATH, "stem_bayes"), stem_doc_parser)
+    stem_bayes.load_or_create_sentiment_stats(stem_train)
+    stem_bayes.load_params_or_train()
 
     print(f"Vanila NaiveBayes accuracy: {test_accuracy(bayes, test)}") # ~ 46%
     print(f"Stemmed NaiveBayes accuracy: {test_accuracy(stem_bayes, stem_test)}") # ~ 25% (wow)
