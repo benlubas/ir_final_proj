@@ -12,15 +12,15 @@ import tantivy
 class Document:
     """Information for a single document"""
 
-    topic: str
-    source: str
-    bias_text: str
-    url: str
-    title: str
-    date: str
-    authors: str
     content: str
-    ID: str
+    topic: str = ""
+    source: str = ""
+    bias_text: str = ""
+    url: str = ""
+    title: str = ""
+    date: str = ""
+    authors: str = ""
+    ID: str = ""
 
 
 class DocumentParser:
@@ -29,20 +29,26 @@ class DocumentParser:
     path: str
     """Path to the /data directory in the Article-Bias-Prediction repo"""
     stem: bool
+    documents: Dict[str, Document] | None
 
     def __init__(self, path: str, stem: bool = False):
         self.path = path
         self.stemmer = PorterStemmer()
         self.stem = stem
+        self.stats = {}
+        self.documents = None
 
     def read_all(self) -> Dict[str, Document]:
         """Reads all files in the given directory and returns a dict of Document objects"""
+        if self.documents:
+            return self.documents
         documents = {}
         all_docs_path = os.path.join(self.path, "jsons/")
         for file in os.listdir(all_docs_path):
             if file.endswith(".json"):
                 d = self.read_file(os.path.join(all_docs_path, file))
                 documents[d.ID] = d
+        self.documents = documents
         return documents
 
     def stem_doc(self, doc: Document) -> Document:
@@ -66,7 +72,11 @@ class DocumentParser:
                 documents[id] = self.read_file(
                     os.path.join(self.path, "jsons/", f"{id}.json")
                 )
-        print(f"splits:\nLeft:   {bias['0']}\nCenter: {bias['1']}\nRight:  {bias['2']}")
+        self.stats["bias_counts"] = {
+            "left": bias["0"],
+            "center": bias["1"],
+            "right": bias["2"],
+        }
         return documents
 
     def read_file(self, file_path: str) -> Document:
