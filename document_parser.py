@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Dict
 from nltk import PorterStemmer
 from nltk import word_tokenize
+from nltk.corpus import stopwords
 import tantivy
 
 
@@ -29,12 +30,14 @@ class DocumentParser:
     path: str
     """Path to the /data directory in the Article-Bias-Prediction repo"""
     stem: bool
+    stop_remove: bool
     documents: Dict[str, Document] | None
 
-    def __init__(self, path: str, stem: bool = False):
+    def __init__(self, path: str, stem: bool = False, stop_remove: bool = False):
         self.path = path
         self.stemmer = PorterStemmer()
         self.stem = stem
+        self.stop_remove = stop_remove
         self.stats = {}
         self.documents = None
 
@@ -55,6 +58,12 @@ class DocumentParser:
         """Returns a new doc with stemmed content"""
         content = [self.stemmer.stem(w) for w in word_tokenize(doc.content)]
         return Document(**{**doc.__dict__, "content": " ".join(content)})
+    
+    def stop_remove_doc(self, doc: Document) -> Document:
+        """ returns a new doc with stop words removed """
+        stop_words = set(stopwords.words('english'))
+        content = " ".join([w for w in word_tokenize(doc.content) if not w.lower() in stop_words])
+        return Document(**{**doc.__dict__, "content": content})
 
     def read_split(self, split: str) -> Dict[str, Document]:
         """Reads all documents that belong to a split and returns a dict of Document objects
@@ -77,6 +86,7 @@ class DocumentParser:
             "center": bias["1"],
             "right": bias["2"],
         }
+        self.documents = documents
         return documents
 
     def read_file(self, file_path: str) -> Document:
@@ -86,7 +96,12 @@ class DocumentParser:
         del data["content_original"]
         del data["source_url"]
         del data["bias"]
-        return Document(**data) if not self.stem else self.stem_doc(Document(**data))
+        doc = Document(**data)
+        if self.stop_remove:
+            doc = self.stop_remove(doc)
+        if self.stem:
+            doc = self.stem_doc(doc)
+        return doc
 
     def add_tanivity_documents(self, index_writer):
         """Adds all documents to the given tantivy index writer"""
