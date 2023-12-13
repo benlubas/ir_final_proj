@@ -1,3 +1,4 @@
+from math import log10
 import os
 from typing import Callable, Dict
 import json
@@ -6,8 +7,6 @@ from document_parser import Document, DocumentParser
 from collections import Counter
 
 CLASSES = ["left", "center", "right"]
-
-PR_CONST = 6e5
 
 
 class NaiveBayes:
@@ -127,14 +126,14 @@ class NaiveBayes:
         doc_counts = self._doc_counts(docs)
         prediction_data = {}
         for id, counts in doc_counts.items():
-            probabilities = {s: 1.0 for s in CLASSES}
+            probabilities = {s: log10(1.0) for s in CLASSES}
             for word, count in counts.items():
-                # calculate the product of the probability of each word for both positive and negative
+                # calculate the product of the probability of each word for left, right, and center
                 for sentiment in CLASSES:
-                    probabilities[sentiment] *= (
-                        self.pr(word, sentiment) * count * PR_CONST
+                    probabilities[sentiment] += (
+                        log10(self.pr(word, sentiment)) * count
                     )
-            prediction_data[id] = normalize(probabilities)
+            # prediction_data[id] = normalize(probabilities)
         return prediction_data
 
     def predict_doc(self, doc: Document) -> Dict[str, float]:
@@ -142,14 +141,14 @@ class NaiveBayes:
         if self.pr is None:
             raise Exception("Must train classifier before predicting")
 
-        probabilities = {s: 1.0 for s in CLASSES}
+        probabilities = {s: log10(1.0) for s in CLASSES}
         for word in doc.content.split():
             for sentiment in CLASSES:
-                probabilities[sentiment] *= self.pr(word, sentiment) * PR_CONST
+                probabilities[sentiment] += log10(self.pr(word, sentiment))
         return probabilities
 
 
-def normalize(d: Dict[str, float]) -> Dict[str, float]:
-    """Normalizes the values in a dictionary to sum to 1"""
-    total = sum(d.values())
-    return {k: v / total for k, v in d.items()}
+# def normalize(d: Dict[str, float]) -> Dict[str, float]:
+#     """Normalizes the values in a dictionary to sum to 1"""
+#     total = sum(d.values())
+#     return {k: v / total for k, v in d.items()}
