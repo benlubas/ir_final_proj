@@ -146,9 +146,3 @@ class NaiveBayes:
             for sentiment in CLASSES:
                 probabilities[sentiment] += log10(self.pr(word, sentiment))
         return probabilities
-
-
-# def normalize(d: Dict[str, float]) -> Dict[str, float]:
-#     """Normalizes the values in a dictionary to sum to 1"""
-#     total = sum(d.values())
-#     return {k: v / total for k, v in d.items()}

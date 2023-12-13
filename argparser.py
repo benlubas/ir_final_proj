@@ -46,6 +46,12 @@ def build_parser():
         "-l", "--limit", help="limit the number of results", type=int, default=10
     )
     query.add_argument(
+        "-d",
+        "--debug",
+        help="print extra info about rankings",
+        action="store_true",
+    )
+    query.add_argument(
         "-b",
         "--bias",
         help="prefer which bias",
@@ -106,16 +112,71 @@ def handle_query_command(args, bayes: NaiveBayes, tantivy: TantivySearch):
                 print(f"{bias.rjust(8)}: {round(score / total * 100, 2)}%")
         case "tantivy":
             results = tantivy.query(text)
-            for doc, score in results[: args.limit]:
+            if args.bias != "none":
+                results = adjust_rankings(results, args.bias, bayes)
+            else:  # this is spaghetti but I don't have time
+                results = [
+                    (
+                        doc,
+                        most_likely(
+                            bayes.predict_doc(Document(content=doc["content"][0]))
+                        ),
+                        score,
+                    )
+                    for doc, score in results
+                ]
+            for doc, prediction, score in results[: args.limit]:
                 title = (
                     f"{doc['title'][0][:WIDTH - 24]}..."
                     if len(doc["title"][0]) > WIDTH - 24
                     else doc["title"][0]
                 )
-                print(format_result(title, doc["ID"][0], doc["content"][0]))
+                print(
+                    format_result(
+                        title,
+                        score,
+                        doc["ID"][0],
+                        doc["content"][0],
+                        prediction,
+                        args.debug,
+                    )
+                )
 
-def format_result(title, id, content):
-    heading = f"{bcolors.HEADER}{title}{bcolors.ENDC}{bcolors.OKCYAN}"
-    heading += f"{id.rjust(WIDTH - len(title))}{bcolors.ENDC}"
+
+# 5% boost, This gives mostly the requested articles, but one or two
+# results that don't match the bias (with 10 results)
+BOOST_MULTIPLIER = 1.05
+
+
+def adjust_rankings(results, bias: str, cassifier: NaiveBayes):
+    for i in range(len(results)):
+        doc, score = results[i]
+        classes = cassifier.predict_doc(Document(content=doc["content"][0]))
+        prediction = most_likely(classes)
+        if prediction == bias:
+            results[i] = (doc, prediction, score * BOOST_MULTIPLIER)
+        else:
+            results[i] = (doc, prediction, score)
+    return sorted(results, key=lambda x: x[-1], reverse=True)
+
+
+def format_result(title, score, id, content, predicted_sentiment, debug):
+    colors = {
+        "left": bcolors.OKBLUE,
+        "right": bcolors.FAIL,  # not throwing shade, repubs are just normally red
+        "center": bcolors.HEADER,
+        "none": bcolors.OKGREEN,
+    }
+    title_color = colors[predicted_sentiment]
+    heading = f"{title_color}{title}{bcolors.ENDC}"
+    heading += f"{bcolors.OKCYAN}{id.rjust(WIDTH - len(title))}{bcolors.ENDC}"
     preview = f"{content[:WIDTH]}\n{content[WIDTH:WIDTH * 2 - 3]}..."
-    return f"{heading}\n{preview}\n"
+    fmt_score = f"\nScore: {score}"
+    return f"{heading}{fmt_score if debug else ''}\n{preview}\n"
+
+
+def most_likely(d: Dict[str, float]) -> str:
+    """Returns the key with the lowest value in the given dictionary (and is thus the most likely
+    prediction)"""
+    total = sum(d.values())
+    return sorted([(k, v / total) for k, v in d.items()], key=lambda x: x[1])[0][0]
