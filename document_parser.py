@@ -96,14 +96,12 @@ class DocumentParser:
         del data["content_original"]
         del data["source_url"]
         del data["bias"]
-        if self.stem and self.stop_remove:
-            return self.stem_doc(self.stop_remove(Document(**data)))
-        elif self.stem:
-            return self.stem_doc(Document(**data))
-        elif self.stop_remove:
-            self.stop_remove(Document(**data))
-        else:
-            return Document(**data)
+        doc = Document(**data)
+        if self.stop_remove:
+            doc = self.stop_remove(doc)
+        if self.stem:
+            doc = self.stem_doc(doc)
+        return doc
 
     def add_tanivity_documents(self, index_writer):
         """Adds all documents to the given tantivy index writer"""
