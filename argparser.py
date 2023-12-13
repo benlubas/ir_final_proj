@@ -115,19 +115,7 @@ def handle_query_command(args, bayes: NaiveBayes, tantivy: TantivySearch):
                 # print(f"{bias.rjust(8)}: {round(score / total * 100, 2)}%")
         case "tantivy":
             results = tantivy.query(text)
-            if args.bias != "none":
-                results = adjust_rankings(results, args.bias, bayes)
-            else:  # this is spaghetti but I don't have time
-                results = [
-                    (
-                        doc,
-                        most_likely(
-                            bayes.predict_doc(Document(content=doc["content"][0]))
-                        ),
-                        score,
-                    )
-                    for doc, score in results
-                ]
+            results = adjust_rankings(results, args.bias, bayes)
             for doc, prediction, score in results[: args.limit]:
                 title = (
                     f"{doc['title'][0][:WIDTH - 24]}..."
