@@ -126,7 +126,7 @@ class NaiveBayes:
         doc_counts = self._doc_counts(docs)
         prediction_data = {}
         for id, counts in doc_counts.items():
-            probabilities = {s: log10(1.0) for s in CLASSES}
+            probabilities = {s: log10(1/3) for s in CLASSES}
             for word, count in counts.items():
                 # calculate the product of the probability of each word for left, right, and center
                 for sentiment in CLASSES:
@@ -141,7 +141,7 @@ class NaiveBayes:
         if self.pr is None:
             raise Exception("Must train classifier before predicting")
 
-        probabilities = {s: log10(1.0) for s in CLASSES}
+        probabilities = {s: log10(1/3) for s in CLASSES}
         for word in doc.content.split():
             for sentiment in CLASSES:
                 probabilities[sentiment] += log10(self.pr(word, sentiment))
