@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Dict
 from nltk import PorterStemmer
 from nltk import word_tokenize
+import tantivy
 
 
 @dataclass
@@ -76,3 +77,20 @@ class DocumentParser:
         del data["source_url"]
         del data["bias"]
         return Document(**data) if not self.stem else self.stem_doc(Document(**data))
+
+    def add_tanivity_documents(self, index_writer):
+        """Adds all documents to the given tantivy index writer"""
+        documents = self.read_all()
+        for doc in documents.values():
+            index_writer.add_document(tantivy.Document(
+                ID=doc.ID,
+                title=doc.title,
+                content=doc.content,
+                bias_text=doc.bias_text,
+                authors=doc.authors,
+                date=doc.date,
+                source=doc.source,
+                topic=doc.topic,
+                url=doc.url,
+            ))
+        index_writer.commit()
