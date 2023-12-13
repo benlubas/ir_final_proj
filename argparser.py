@@ -99,11 +99,14 @@ def handle_query_command(args, bayes: NaiveBayes, tantivy: TantivySearch):
             # want to take some text, and predict the bias, either from a file, or from a string
             doc = Document(content=text)
             prediction = bayes.predict_doc(doc)
-            total = sum(prediction.values())
-            for bias, score in sorted(
-                prediction.items(), key=lambda x: x[1], reverse=True
-            ):
-                print(f"{bias.rjust(8)}: {round(score / total * 100, 2)}%")
+            # TODO: need to use the sliding scale stuff for this, can no longer normalize it and get
+            # an accurate result
+            print(prediction)
+            # total = sum(prediction.values())
+            # for bias, score in sorted(
+            #     prediction.items(), key=lambda x: x[1], reverse=True
+            # ):
+                # print(f"{bias.rjust(8)}: {round(score / total * 100, 2)}%")
         case "tantivy":
             results = tantivy.query(text)
             for doc, score in results[: args.limit]:
