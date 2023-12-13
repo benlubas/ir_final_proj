@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Dict
 from nltk import PorterStemmer
 from nltk import word_tokenize
+from nltk.corpus import stopwords
 import tantivy
 
 
@@ -29,11 +30,13 @@ class DocumentParser:
     path: str
     """Path to the /data directory in the Article-Bias-Prediction repo"""
     stem: bool
+    stop_remove: bool
 
-    def __init__(self, path: str, stem: bool = False):
+    def __init__(self, path: str, stem: bool = False, stop_remove: bool = False):
         self.path = path
         self.stemmer = PorterStemmer()
         self.stem = stem
+        self.stop_remove = stop_remove
 
     def read_all(self) -> Dict[str, Document]:
         """Reads all files in the given directory and returns a dict of Document objects"""
@@ -49,6 +52,12 @@ class DocumentParser:
         """Returns a new doc with stemmed content"""
         content = [self.stemmer.stem(w) for w in word_tokenize(doc.content)]
         return Document(**{**doc.__dict__, "content": " ".join(content)})
+    
+    def stop_remove_doc(self, doc: Document) -> Document:
+        """ returns a new doc with stop words removed """
+        stop_words = set(stopwords.words('english'))
+        content = " ".join([w for w in word_tokenize(doc.content) if not w.lower() in stop_words])
+        return Document(**{**doc.__dict__, "content": content})
 
     def read_split(self, split: str) -> Dict[str, Document]:
         """Reads all documents that belong to a split and returns a dict of Document objects
@@ -76,7 +85,14 @@ class DocumentParser:
         del data["content_original"]
         del data["source_url"]
         del data["bias"]
-        return Document(**data) if not self.stem else self.stem_doc(Document(**data))
+        if self.stem and self.stop_remove:
+            return self.stem_doc(self.stop_remove(Document(**data)))
+        elif self.stem:
+            return self.stem_doc(Document(**data))
+        elif self.stop_remove:
+            self.stop_remove(Document(**data))
+        else:
+            return Document(**data)
 
     def add_tanivity_documents(self, index_writer):
         """Adds all documents to the given tantivy index writer"""
