@@ -42,6 +42,8 @@ def build_parser():
         "--json",
         help="path to document represented as json (useful for sentiment analysis of a document)",
     )
+    query.add_argument("-o", "--only", help="only show results with this bias")
+    query.add_argument("-r", "--remove", help="remote results with this bias")
     query.add_argument(
         "-l", "--limit", help="limit the number of results", type=int, default=10
     )
@@ -70,6 +72,9 @@ def handle_docs_command(args, docs: Dict[str, Document]):
         case "show":
             if not args.id:
                 print("Must provide an id with `doc show`")
+                return
+            if args.id not in docs:
+                print(f"Document with id {args.id} not found")
                 return
             print(docs[args.id])
 
@@ -116,6 +121,10 @@ def handle_query_command(args, bayes: NaiveBayes, tantivy: TantivySearch):
         case "tantivy":
             results = tantivy.query(text)
             results = adjust_rankings(results, args.bias, bayes)
+            if args.remove:
+                results = [res for res in results if res[1] != args.remove]
+            if args.only:
+                results = [res for res in results if res[1] == args.only]
             for doc, prediction, score in results[: args.limit]:
                 title = (
                     f"{doc['title'][0][:WIDTH - 24]}..."
