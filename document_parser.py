@@ -58,7 +58,7 @@ class DocumentParser:
         """Returns a new doc with stemmed content"""
         content = [self.stemmer.stem(w) for w in word_tokenize(doc.content)]
         return Document(**{**doc.__dict__, "content": " ".join(content)})
-    
+
     def stop_remove_doc(self, doc: Document) -> Document:
         """ returns a new doc with stop words removed """
         stop_words = set(stopwords.words('english'))
@@ -98,7 +98,7 @@ class DocumentParser:
         del data["bias"]
         doc = Document(**data)
         if self.stop_remove:
-            doc = self.stop_remove(doc)
+            doc = self.stop_remove_doc(doc)
         if self.stem:
             doc = self.stem_doc(doc)
         return doc
