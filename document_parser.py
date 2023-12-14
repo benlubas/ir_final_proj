@@ -31,7 +31,7 @@ class DocumentParser:
     """Path to the /data directory in the Article-Bias-Prediction repo"""
     stem: bool
     stop_remove: bool
-    documents: Dict[str, Document] | None
+    all_documents: Dict[str, Document] | None
 
     def __init__(self, path: str, stem: bool = False, stop_remove: bool = False):
         self.path = path
@@ -39,12 +39,12 @@ class DocumentParser:
         self.stem = stem
         self.stop_remove = stop_remove
         self.stats = {}
-        self.documents = None
+        self.all_documents = None
 
     def read_all(self) -> Dict[str, Document]:
         """Reads all files in the given directory and returns a dict of Document objects"""
-        if self.documents:
-            return self.documents
+        if self.all_documents:
+            return self.all_documents
         documents = {}
         all_docs_path = os.path.join(self.path, "jsons/")
         for file in os.listdir(all_docs_path):
