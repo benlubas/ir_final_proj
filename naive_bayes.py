@@ -1,6 +1,6 @@
 from math import log10
 import os
-from typing import Callable, Dict
+from typing import Callable, Dict, Tuple
 import json
 
 from document_parser import Document, DocumentParser
@@ -147,6 +147,30 @@ class NaiveBayes:
                 probabilities[sentiment] += log10(self.pr(word, sentiment))
         return probabilities
 
+    def predict_scale_doc(self, doc: Document) -> list:
+        """Predicts a sentiment scale for a doc, outputs a value on the scale of -1 <= val <= 1, -1 being left, 0 being center, 1 being right"""
+
+        doc_sentiments = self.predict_doc(doc)
+        doc_len = len(doc.content.split(" "))
+
+        sentiment_predicted = max(doc_sentiments.items(), key=lambda x: x[1])
+
+        sentiment_scale_val =  sentiment_predicted[1] / doc_len
+
+        if sentiment_predicted[0] == 'left':
+            centeredness = sentiment_scale_val / (doc_sentiments.get('right') / doc_len)
+            term_weight = 10**sentiment_scale_val
+        elif sentiment_predicted[0] == 'right':
+            centeredness = sentiment_scale_val / (doc_sentiments.get('left') / doc_len)
+            term_weight = 10**sentiment_scale_val
+        else:
+            centeredness = 0
+            term_weight = 0
+            # centeredness = sentiment_scale_val / ((doc_sentiments.get('left') / doc_len) + (doc_sentiments.get('right') / doc_len))
+            # if doc_sentiments.get("left") > doc_sentiments.get('right'):
+            #     centeredness *= -1
+        return [sentiment_predicted[0], centeredness, term_weight]
+        
 
 # def normalize(d: Dict[str, float]) -> Dict[str, float]:
 #     """Normalizes the values in a dictionary to sum to 1"""

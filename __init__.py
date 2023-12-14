@@ -42,6 +42,15 @@ if __name__ == "__main__":
     print(f"Stemmed NaiveBayes accuracy: {test_accuracy(stem_bayes, stem_test)}") # ~ 25% (wow)
     # print(list(docs["left"].items())[:100])
 
+    test_doc = vanila_doc_parser.read_file("../Article-Bias-Prediction/data/0a2hVwQs5IIjm7ur.json")
+    sentiment_stats = bayes.predict_scale_doc(test_doc)
+    print("Showing bias scale:")
+    print("Document: " + test_doc.topic)
+    print("Predicted Sentiment: " + sentiment_stats[0])
+    print("Sentiment ratio (how much more right or left the document is): " + str(sentiment_stats[1]))
+    print("Political sentiment strenght: " + str(sentiment_stats[2]))
+
+
     ts = TantivySearch("vanila")
     ts.add_documents(vanila_doc_parser)
     results = ts.query("Obama")
