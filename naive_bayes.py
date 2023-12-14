@@ -1,6 +1,6 @@
 from math import log10
 import os
-from typing import Callable, Dict
+from typing import Callable, Dict, Tuple
 import json
 
 from document_parser import Document, DocumentParser
