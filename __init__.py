@@ -1,10 +1,12 @@
 import os
 from typing import Dict
+from argparser import build_parser, handle_docs_command, handle_query_command
 from naive_bayes import NaiveBayes
 from document_parser import Document, DocumentParser
 from tantivy_search import TantivySearch
 
 DATA_PATH = "./data"
+
 
 def test_accuracy(model: NaiveBayes, test_set: Dict[str, Document]) -> float:
     predictions = model.predict(test)
@@ -16,6 +18,7 @@ def test_accuracy(model: NaiveBayes, test_set: Dict[str, Document]) -> float:
         if prediction == test_set[id].bias_text:
             correct += 1
     return correct / total
+
 
 if __name__ == "__main__":
     # NOTE: Only have to do this once
@@ -52,7 +55,16 @@ if __name__ == "__main__":
 
 
     ts = TantivySearch("vanila")
-    ts.add_documents(vanila_doc_parser)
-    results = ts.query("Obama")
-    print(results)
-    print(len(results))
+    if not ts.index_exists:
+        ts.add_documents(vanila_doc_parser)
+    # results = ts.query("Obama")
+    # print(results)
+    # print(len(results))
+
+    args = build_parser().parse_args()
+    print()  # print blank line
+    match args.command:
+        case "docs":
+            handle_docs_command(args, vanila_doc_parser.read_all())
+        case "query":
+            handle_query_command(args, bayes, ts)

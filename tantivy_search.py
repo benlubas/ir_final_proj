@@ -8,16 +8,18 @@ from document_parser import DocumentParser
 class TantivySearch:
     index: tantivy.Index
     schema: tantivy.Schema
-    id: str = "default"
+    identifier: str = "default"
+    index_exists: bool = False
 
     def __init__(self, id) -> None:
-        self.id = id
+        self.identifier = id
+        self.index_exists = False
 
         # Declaring our schema.
         schema_builder = tantivy.SchemaBuilder()
         schema_builder.add_text_field("title", stored=True)
         schema_builder.add_text_field("content", stored=True)
-        schema_builder.add_text_field("id", stored=True)
+        schema_builder.add_text_field("ID", stored=True)
         schema_builder.add_text_field("bias_text", stored=True)
         schema_builder.add_text_field("authors", stored=True)
         schema_builder.add_text_field("date", stored=True)
@@ -28,15 +30,18 @@ class TantivySearch:
         self.schema = schema_builder.build()
 
         # Creating our index
-        os.makedirs(f"./data/tantivy/{self.id}", exist_ok=True)
-        self.index = tantivy.Index(self.schema, path=f"./data/tantivy/{self.id}")
+        if os.path.exists(f"./data/tantivy/{self.identifier}"):
+            self.index_exists = True
+
+        os.makedirs(f"./data/tantivy/{self.identifier}", exist_ok=True)
+        self.index = tantivy.Index(self.schema, path=f"./data/tantivy/{self.identifier}")
 
     def add_documents(self, doc_parser: DocumentParser):
         """Adds all documents from the given DocumentParser to the index, this has to be done once,
         as the index is persisted to disk."""
         doc_parser.add_tanivity_documents(self.index.writer())
 
-    def query(self, query: str) -> List[Tuple[str, float]]:
+    def query(self, query: str) -> List[Tuple[tantivy.Document, float]]:
         """Returns a tantivy.Searcher object for the given query
         args:
             query: string query to search for
