@@ -143,9 +143,8 @@ def handle_query_command(args, bayes: NaiveBayes, tantivy: TantivySearch):
                 )
 
 
-# 5% boost, This gives mostly the requested articles, but one or two
-# results that don't match the bias (with 10 results)
-BOOST_MULTIPLIER = 1.05
+# 10% boost, This gives mostly the requested articles, highly dependent on the query
+BOOST_MULTIPLIER = 1.1
 
 
 def adjust_rankings(results, bias: str, cassifier: NaiveBayes):
