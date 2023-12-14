@@ -36,6 +36,10 @@ if __name__ == "__main__":
     stop_remove_doc_parser = DocumentParser("./data/stop_removed/")
     stop_remove_train = stop_remove_doc_parser.read_split("train")
     stop_remove_test = stop_remove_doc_parser.read_split("test")
+    
+    stop_stem_doc_parser = DocumentParser("./data/stop_stem/")
+    stop_stem_train = stop_stem_doc_parser.read_split("train")
+    stop_stem_test = stop_stem_doc_parser.read_split("test")
 
     bayes = NaiveBayes(os.path.join(DATA_PATH, "vanila_bayes"), vanila_doc_parser)
     bayes.load_or_create_sentiment_stats(train)
@@ -48,10 +52,15 @@ if __name__ == "__main__":
     stop_remove_bayes = NaiveBayes(os.path.join(DATA_PATH, "stop_remove_bayes"), stop_remove_doc_parser)
     stop_remove_bayes.load_or_create_sentiment_stats(stop_remove_train)
     stop_remove_bayes.load_params_or_train()
+    
+    stop_stem_bayes = NaiveBayes(os.path.join(DATA_PATH, "stop_stem_bayes"), stop_stem_doc_parser)
+    stop_stem_bayes.load_or_create_sentiment_stats(stop_stem_train)
+    stop_stem_bayes.load_params_or_train()
 
     print(f"Vanila NaiveBayes accuracy: {test_accuracy(bayes, test)}") # ~ 46%
     print(f"Stemmed NaiveBayes accuracy: {test_accuracy(stem_bayes, stem_test)}") # ~ 25% (wow)
-    print(f"Stopword Removal NaiveBayes accuracy: {test_accuracy(stop_remove_bayes, stop_remove_test)}") # ~ 25% (wow)
+    print(f"Stopword Removal NaiveBayes accuracy: {test_accuracy(stop_remove_bayes, stop_remove_test)}")
+    print(f"Stopword Removal and Stemming NaiveBayes accuracy: {test_accuracy(stop_remove_bayes, stop_stem_test)}")
     # print(list(docs["left"].items())[:100])
 
     ts = TantivySearch("vanila")

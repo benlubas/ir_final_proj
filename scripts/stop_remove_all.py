@@ -1,15 +1,13 @@
-""" Stem all the documents and save them, this takes like 10 minutes to run. Make sure to copy the
-contents of Article-Bias-Prediction/data/jsons into ../data/stemmed_jsons """
+""" stop word remove all the documents and save them, this takes like 10 minutes to run. Make sure to copy the
+contents of Article-Bias-Prediction/data/jsons into ../data/stop_remove_jsons """
 
 
-from nltk import PorterStemmer, word_tokenize
+from nltk import word_tokenize
 import os
 from nltk.corpus import stopwords
 from nltk.jsontags import json
 
 stop_words = set(stopwords.words('english'))
-
-stemmer = PorterStemmer()
 
 for file in os.listdir("data/stop_removed_jsons/"):
     with open(os.path.join("data/stop_removed_jsons/", file), "r") as f:
