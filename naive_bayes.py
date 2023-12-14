@@ -148,7 +148,8 @@ class NaiveBayes:
         return probabilities
 
     def predict_scale_doc(self, doc: Document) -> list:
-        """Predicts a sentiment scale for a doc, outputs a value on the scale of -1 <= val <= 1, -1 being left, 0 being center, 1 being right"""
+        """Predicts a sentiment scale for a doc, outputs a value on the scale of -1 <= val <= 1,
+        -1 being left, 0 being center, 1 being right"""
 
         doc_sentiments = self.predict_doc(doc)
         doc_len = len(doc.content.split(" "))
