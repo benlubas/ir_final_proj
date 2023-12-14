@@ -45,7 +45,7 @@ if __name__ == "__main__":
     print(f"Stemmed NaiveBayes accuracy: {test_accuracy(stem_bayes, stem_test)}") # ~ 25% (wow)
     # print(list(docs["left"].items())[:100])
 
-    test_doc = vanila_doc_parser.read_file("../Article-Bias-Prediction/data/0a2hVwQs5IIjm7ur.json")
+    test_doc = vanila_doc_parser.read_file("../Article-Bias-Prediction/data/jsons/0a2hVwQs5IIjm7ur.json")
     sentiment_stats = bayes.predict_scale_doc(test_doc)
     print("Showing bias scale:")
     print("Document: " + test_doc.topic)
